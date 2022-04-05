@@ -7,8 +7,11 @@ import dotenv from "dotenv";
 import passport from "passport";
 import hpp from "hpp";
 import helmet from "helmet";
-
+import swaggerOptions from "./swagger";
 import { sequelize } from "./models";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsDoc from "swagger-jsdoc";
+
 // import userRouter from "./routes/user";
 // import postRouter from "./routes/post";
 // import postsRouter from "./routes/posts";
@@ -17,6 +20,7 @@ import { sequelize } from "./models";
 dotenv.config();
 const app = express();
 const prod: boolean = process.env.NODE_ENV === "production";
+const specs = swaggerJsDoc(swaggerOptions);
 
 sequelize
   .sync({ force: false })
@@ -28,6 +32,8 @@ sequelize
   });
 
 app.set("port", prod ? process.env.PORT : 3065);
+
+app.use("/api", swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
 if (prod) {
   app.use(hpp());
