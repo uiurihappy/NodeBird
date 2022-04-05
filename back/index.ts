@@ -4,7 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import expressSession from "express-session";
 import dotenv from "dotenv";
-import passport from "./node_modules/passport";
+import passport from "passport";
 import hpp from "hpp";
 import helmet from "helmet";
 
