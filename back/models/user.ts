@@ -4,7 +4,7 @@ import { sequelize } from "./sequelize";
 
 class User extends Model {
   public readonly id!: number;
-  public name!: string;
+  public nickname!: string;
   public userId!: string;
   public password!: string;
   public readonly createdAt!: Date;
@@ -12,7 +12,7 @@ class User extends Model {
 }
 User.init(
   {
-    name: {
+    nickname: {
       type: DataTypes.STRING(20),
     },
     userId: {

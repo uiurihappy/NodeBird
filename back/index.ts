@@ -1,14 +1,16 @@
 import * as express from "express";
 import { Request, Response, NextFunction, Application } from "express";
-import * as morgan from "morgan";
-import * as cors from "cors";
-import * as cookieParser from "cookie-parser";
-import * as expressSession from "express-session";
-import * as dotenv from "dotenv";
-import * as passport from "passport";
-import * as hpp from "hpp";
-import * as helmet from "helmet";
+import morgan from "morgan";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import expressSession from "express-session";
+import dotenv from "dotenv";
+import passport from "passport";
+import hpp from "hpp";
+import helmet from "helmet";
 // import * as passportLocal from "passport-local";
+
+import { sequelize } from "./models";
 
 dotenv.config();
 const app = express();
@@ -16,10 +18,18 @@ const prod: boolean = process.env.NODE_ENV === "production";
 
 //port 변수 설정
 app.set("port", prod ? process.env.PORT : 3065);
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log("데이터베이스 연결 성공!");
+  })
+  .catch((err: Error) => {
+    console.log(err);
+  });
 
 if (prod) {
   app.use(hpp());
-  //app.use(helmet());
+  app.use(helmet());
   app.use(morgan("combined"));
   app.use(
     cors({
