@@ -1,31 +1,33 @@
-import * as express from "express";
-import { Request, Response, NextFunction, Application } from "express";
+import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import expressSession from "express-session";
 import dotenv from "dotenv";
-import passport from "passport";
+import passport from "./node_modules/passport";
 import hpp from "hpp";
 import helmet from "helmet";
-// import * as passportLocal from "passport-local";
 
 import { sequelize } from "./models";
+// import userRouter from "./routes/user";
+// import postRouter from "./routes/post";
+// import postsRouter from "./routes/posts";
+// import hashtagRouter from "./routes/hashtag";
 
 dotenv.config();
 const app = express();
 const prod: boolean = process.env.NODE_ENV === "production";
 
-//port 변수 설정
-app.set("port", prod ? process.env.PORT : 3065);
 sequelize
   .sync({ force: false })
   .then(() => {
-    console.log("데이터베이스 연결 성공!");
+    console.log("데이터베이스 연결 성공");
   })
   .catch((err: Error) => {
-    console.log(err);
+    console.error(err);
   });
+
+app.set("port", prod ? process.env.PORT : 3065);
 
 if (prod) {
   app.use(hpp());
@@ -58,8 +60,8 @@ app.use(
     secret: process.env.COOKIE_SECRET!,
     cookie: {
       httpOnly: true,
-      secure: false,
-      domain: prod ? ".nodebird.com" : undefined, //false 대신 undefined
+      secure: false, // https -> true
+      domain: prod ? ".nodebird.com" : undefined,
     },
     name: "ybcha",
   })
@@ -68,11 +70,15 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.use("/user", userRouter);
+// app.use("/post", postRouter);
+// app.use("/posts", postsRouter);
+// app.use("/hashtag", hashtagRouter);
+
 app.get("/", (req, res, next) => {
-  res.send("react nodebird server...");
+  res.send("react nodebird 백엔드 정상 동작!");
 });
 
-// 개발용 port
 app.listen(app.get("port"), () => {
-  console.log(`server running on ${app.get("port")}`);
+  console.log(`server is running on ${app.get("port")}`);
 });

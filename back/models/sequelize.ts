@@ -9,4 +9,4 @@ const { database, username, password } = config[env];
 const sequelize = new Sequelize(database, username, password, config[env]);
 
 export { sequelize };
-//export default sequelize;
+export default sequelize;
