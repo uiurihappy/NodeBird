@@ -8,12 +8,12 @@ import passport from "passport";
 import hpp from "hpp";
 import helmet from "helmet";
 import swaggerOptions from "./swagger";
-import { sequelize } from "./models";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
+import { sequelize } from "./models";
+import userRouter from "./routes/user";
+import postRouter from "./routes/post";
 
-// import userRouter from "./routes/user";
-// import postRouter from "./routes/post";
 // import postsRouter from "./routes/posts";
 // import hashtagRouter from "./routes/hashtag";
 
@@ -75,9 +75,9 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/user", userRouter);
+app.use("/post", postRouter);
 
-// app.use("/user", userRouter);
-// app.use("/post", postRouter);
 // app.use("/posts", postsRouter);
 // app.use("/hashtag", hashtagRouter);
 

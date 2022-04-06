@@ -19,8 +19,8 @@ Hashtag.init(
     sequelize,
     modelName: "Hashtag",
     tableName: "hashtag",
-    charset: "utf8mb4",
-    collate: "utf8mb4_general_ci",
+    charset: "utf8",
+    collate: "utf8_general_ci",
   }
 );
 export const associate = (db: dbType) => {};

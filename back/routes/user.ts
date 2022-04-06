@@ -4,6 +4,7 @@ import User from "../models/user";
 import * as bcrypt from "bcrypt";
 import * as passport from "passport";
 import Post from "../models/post";
+import Image from "../models/image";
 const router = express.Router();
 
 // 로그인 여부
@@ -143,20 +144,105 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // 팔로잉 조회
-router.get("/:id/followings", isLoggedIn, async (req, res, next) => {
+router.get<any, any, any, { limit: string; offset: string }>(
+  "/:id/followers",
+  isLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.findOne({
+        where: {
+          id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+        },
+      });
+      if (!user) return res.status(404).send("no user");
+
+      const followers = await user.getFollowers({
+        attributes: ["id", "nickname"],
+        limit: parseInt(req.query.limit, 10),
+        offset: parseInt(req.query.offset, 10),
+      });
+      return res.json(followers);
+    } catch (err) {
+      console.error(err);
+      return next(err);
+    }
+  }
+);
+
+router.post("/:id/follow", isLoggedIn, async (req, res, next) => {
   try {
-    const user = await User.findOne({
+    const me = await User.findOne({
       where: {
-        id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+        id: req.user!.id,
       },
     });
-    if (!user) return res.status(404).send("no user");
-
-    const follower = await user.getFollowings({
-      attributes: ["id", "nickname"],
-    });
+    await me!.addFollowing(parseInt(req.params.id, 10));
+    res.send(req.params.id);
   } catch (err) {
     console.error(err);
     return next(err);
   }
 });
+
+router.delete("/:id/follow", isLoggedIn, async (req, res, next) => {
+  try {
+    const me = await User.findOne({
+      where: {
+        id: req.user!.id,
+      },
+    });
+    await me!.removeFollowing(parseInt(req.params.id, 10));
+    res.send(req.params.id);
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+});
+
+router.get("/:id/posts", async (req, res, next) => {
+  try {
+    const posts = await Post.findOne({
+      where: {
+        Userid: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+        RetweetId: null,
+      },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "nickname"],
+        },
+        {
+          model: Image,
+        },
+        {
+          model: User,
+          as: "Likers",
+          attributes: ["id"],
+        },
+      ],
+    });
+    return res.json(posts);
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+});
+
+router.patch("/nickname", isLoggedIn, async (req, res, next) => {
+  try {
+    await User.update(
+      {
+        nickname: req.body.nickname,
+      },
+      {
+        where: { id: req.user!.id },
+      }
+    );
+    res.send(req.body.nickname);
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
+});
+
+export default router;

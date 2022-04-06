@@ -2,6 +2,7 @@ import {
   BelongsToGetAssociationMixin,
   BelongsToManyAddAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
   BelongsToManyRemoveAssociationsMixin,
   DataTypes,
   HasManyAddAssociationsMixin,
@@ -26,9 +27,9 @@ class User extends Model {
 
   public addFollowing!: BelongsToManyAddAssociationMixin<User, number>;
   public getFollowings!: BelongsToManyGetAssociationsMixin<User>;
-  public removeFollowings!: BelongsToManyRemoveAssociationsMixin<User, number>;
+  public removeFollowing!: BelongsToManyRemoveAssociationMixin<User, number>;
   public getFollowers!: BelongsToManyGetAssociationsMixin<User>;
-  public removeFollowers!: BelongsToManyRemoveAssociationsMixin<User, number>;
+  public removeFollower!: BelongsToManyRemoveAssociationMixin<User, number>;
   public getPosts!: HasManyGetAssociationsMixin<Post>;
 }
 
@@ -58,6 +59,8 @@ User.init(
 
 export const associate = (db: dbType) => {
   db.User.hasMany(db.Post, { as: "Post" });
+  db.User.hasMany(db.Comment);
+  db.User.belongsToMany(db.Post, { through: "Like", as: "Liked" });
   db.User.belongsToMany(db.User, {
     through: "Follow",
     as: "Followers",
