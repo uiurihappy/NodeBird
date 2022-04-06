@@ -145,6 +145,31 @@ router.get("/:id", async (req, res, next) => {
 
 // 팔로잉 조회
 router.get<any, any, any, { limit: string; offset: string }>(
+  "/:id/followings",
+  isLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.findOne({
+        where: {
+          id: parseInt(req.params.id, 10) || (req.user && req.user.id) || 0,
+        },
+      });
+      if (!user) return res.status(404).send("no user");
+      const followings = await user.getFollowings({
+        attributes: ["id", "nickname"],
+        limit: parseInt(req.query.limit, 10),
+        offset: parseInt(req.query.offset, 10),
+      });
+      return res.json(followings);
+    } catch (e) {
+      console.error(e);
+      return next(e);
+    }
+  }
+);
+
+// 팔로워 조회
+router.get<any, any, any, { limit: string; offset: string }>(
   "/:id/followers",
   isLoggedIn,
   async (req, res, next) => {
@@ -168,6 +193,19 @@ router.get<any, any, any, { limit: string; offset: string }>(
     }
   }
 );
+
+router.delete("/:id/follower", isLoggedIn, async (req, res, next) => {
+  try {
+    const me = await User.findOne({
+      where: { id: req.user!.id },
+    });
+    await me!.removeFollower(parseInt(req.params.id, 10));
+    res.send(req.params.id);
+  } catch (e) {
+    console.error(e);
+    next(e);
+  }
+});
 
 router.post("/:id/follow", isLoggedIn, async (req, res, next) => {
   try {
